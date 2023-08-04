@@ -12,6 +12,15 @@ def copy_file(source_path, target_path):
         print(f"An error occurred: {e}")
         
 
+        
+def remove_file(file_path):
+	try:
+		os.remove(file_path)
+		print(f"Deleted: {file_path}")
+	except Exception as e:
+		print(f"An error occured: {e}")
+		
+
 def find_added_svg_file(root_folder, svg_file_name):
     added_svg_files = []
     for root, dirs, files in os.walk(root_folder):
@@ -33,11 +42,14 @@ def find_added_svg_file(root_folder, svg_file_name):
     return added_svg_files
 		
 if __name__ == "__main__":
-	root_folder = "/home/hicran/Resource_merger_script/Orion_obs"
-	svg_file_name = "stajyer_script_1.svg"
+	root_folder = "/root_folderpath"
+	svg_file_name = "file.svg"
 	result = find_added_svg_file(root_folder, svg_file_name)
 	if result:
 		print("Bulunan dosya yollari: ")
 		for file_path in result:
 			print(file_path)
+			
+	for file_path in result:
+    		remove_file(file_path)
 
