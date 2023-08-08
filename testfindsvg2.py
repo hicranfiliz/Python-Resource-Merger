@@ -32,7 +32,7 @@ def remove_last_n_lines(file_path, n):
 
 def update_component_mak(component_mak_file, source_svg_file):
     target_section = "GAMEBOARD_XML_FILES :="
-    target_section_end = target_section + "\n"
+    target_section_end = "\\"
 
     with open(component_mak_file, "r") as f:
         lines = f.readlines()
@@ -41,22 +41,24 @@ def update_component_mak(component_mak_file, source_svg_file):
     updated_lines = []
 
     for line in lines:
-        if target_section_end in line:
+        if target_section in line:
             found_target_section = True
-            line = line.strip()  # Satır sonu karakterini kaldır
-            updated_lines.append(line + f" {source_svg_file}\n")
+            if line.strip().endswith(target_section_end):
+                # Eğer satırın sonunda "\\\" varsa, devam eden satırları ekleyeceğiz
+                updated_lines.append(line + f" {source_svg_file}\n")
+            else:
+                # Eğer "\\\" yoksa, bu satırın sonuna ekleyeceğiz
+                updated_lines.append(line.rstrip() + f" \\ {source_svg_file}\n")
         else:
-            updated_lines.append(line)
+            updated_lines.append(line)  # Satırı güncellemeyecekseniz, aynı şekilde ekle
 
     if not found_target_section:
-        # Hedef bölümün sonuna ekle
-        updated_lines.append(f"{target_section} {source_svg_file}\n")
+        print("Hedef bulunamadı.")
+    else:
+        with open(component_mak_file, "w") as f:
+            f.writelines(updated_lines)
+            print(f"SVG dosyası {source_svg_file} dosyasına eklendi.")
 
-    with open(component_mak_file, "w") as f:
-        f.writelines(updated_lines)
-
-    print(f"SVG dosyası {source_svg_file} dosyasına eklendi.")
-	
 	
 def find_added_svg_file(root_folder, svg_file_name):
     added_svg_files = []
@@ -84,7 +86,7 @@ def find_added_svg_file(root_folder, svg_file_name):
                print(f"component.mak file found at: {component_mak_file}")
                source_svg_file = f"$(svg_path)/GameControlBoard/{svg_file_name}"
                #remove_last_n_lines(component_mak_file,15)
-               #update_component_mak(component_mak_file, source_svg_file)
+               update_component_mak(component_mak_file, source_svg_file)
                #for file_path in added_svg_files:
                 #    update_component_mak(component_mak_file, source_svg_file)
     else:
