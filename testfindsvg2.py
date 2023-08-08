@@ -1,5 +1,7 @@
-import shutil
 import os
+import shutil
+## sorunsuz çalışan kod!
+# dosyayi basariyla bulup digerlerine kopyalayip hepsinden siliyor.
 
 def copy_file(source_path, target_path):
     if source_path == target_path:
@@ -11,7 +13,6 @@ def copy_file(source_path, target_path):
     except Exception as e:
         print(f"An error occurred: {e}")
         
-
         
 def remove_file(file_path):
 	try:
@@ -19,8 +20,8 @@ def remove_file(file_path):
 		print(f"Deleted: {file_path}")
 	except Exception as e:
 		print(f"An error occured: {e}")
-		
-		
+	
+	
 def remove_last_n_lines(file_path, n):
 	with open(file_path , 'r') as file:
 		lines = file.readlines()
@@ -28,47 +29,99 @@ def remove_last_n_lines(file_path, n):
 	with open(file_path, 'w') as file:
 		file.writelines(lines[:-n])
 		
-		
-def update_component_mak(root_folder):
-	component_mak_filename = "component.mak"
-	for root, _, files in os.walk(root_folder):
-		if component_mak_filename in files:
-			component_mak_path = os.path.join(root, component_mak_filename)
-			#remove_last_n_lines(component_mak_path, 14)
-			with open(component_mak_path, 'a') as component_mak_file:
-				component_mak_file.write("\n# added svg file")
-		
 
+def update_component_mak(component_mak_file, source_svg_file):
+    target_section = "GAMEBOARD_XML_FILES :="
+    target_section_end = target_section + "\n"
+
+    with open(component_mak_file, "r") as f:
+        lines = f.readlines()
+
+    found_target_section = False
+    updated_lines = []
+
+    for line in lines:
+        if target_section_end in line:
+            found_target_section = True
+            line = line.strip()  # Satır sonu karakterini kaldır
+            updated_lines.append(line + f" {source_svg_file}\n")
+        else:
+            updated_lines.append(line)
+
+    if not found_target_section:
+        # Hedef bölümün sonuna ekle
+        updated_lines.append(f"{target_section} {source_svg_file}\n")
+
+    with open(component_mak_file, "w") as f:
+        f.writelines(updated_lines)
+
+    print(f"SVG dosyası {source_svg_file} dosyasına eklendi.")
+	
+	
 def find_added_svg_file(root_folder, svg_file_name):
     added_svg_files = []
+    component_mak_folders = []
+    
     for root, dirs, files in os.walk(root_folder):
         for file in files:
             if file == svg_file_name and file.endswith(".svg"):
                 added_svg_files.append(os.path.join(root, file))
+            elif file == "component.mak":
+            	component_mak_folders.append(root)
                 
     if added_svg_files:
-        print("File found.")
-        for file_path in added_svg_files:
-            for root, dirs, _ in os.walk(root_folder):
-                target_folder = os.path.join(root, "svg/GameControlBoard")
+        print("SVG file found.")
+        target_folder = os.path.join(root_folder, "svg/GameControlBoard")
+        if os.path.exists(target_folder):
+            for file_path in added_svg_files:
+                copy_file(file_path, target_folder)
+                print(f"SVG file copied to: {target_folder}")
                 
-                if os.path.exists(target_folder):
-                    copy_file(file_path, target_folder)
+                
+        for component_mak_folder in component_mak_folders:
+           component_mak_file = os.path.join(component_mak_folder, "component.mak")
+           if os.path.exists(component_mak_file):
+               print(f"component.mak file found at: {component_mak_file}")
+               source_svg_file = f"$(svg_path)/GameControlBoard/{svg_file_name}"
+               #remove_last_n_lines(component_mak_file,15)
+               #update_component_mak(component_mak_file, source_svg_file)
+               #for file_path in added_svg_files:
+                #    update_component_mak(component_mak_file, source_svg_file)
     else:
         print("File not found.")
-        
-    return added_svg_files
-		
+      
+    #return added_svg_files,component_mak_file
+
 if __name__ == "__main__":
-	root_folder = "/root_folderpath"
-	svg_file_name = "file.svg"
-	update_component_mak(root_folder)
-	result = find_added_svg_file(root_folder, svg_file_name)
-	if result:
-		print("Bulunan dosya yollari: ")
-		for file_path in result:
-			print(file_path)
-			
-	for file_path in result:
-    		remove_file(file_path)
+    root_folder = "/home/hicran/Resource_merger_script/orion_obs"
+    svg_file_name = "stajyer_script_1.svg"
+    find_added_svg_file(root_folder, svg_file_name)
+"""    
+    #result = find_added_svg_file(root_folder, svg_file_name)
+    source_svg_file = f"$(svg_path)/GameControlBoard/{svg_file_name}"
+    added_svg_files, component_mak_file = find_added_svg_file(root_folder, svg_file_name)
+    
+    if component_mak_file:
+        print(f"component.mak found: {component_mak_file}")
+        for file_path in added_svg_files:
+            update_component_mak(component_mak_file, source_svg_file)
+    else:
+        print("component.mak not found.")
+"""
+"""
+    #update_component_mak(root_folder)
+    result = find_added_svg_file(root_folder, svg_file_name)
+    source_svg_file = f"$(svg_path)/GameControlBoard/{svg_file_name}"
+    for file_path in result:
+    	component_mak_file = os.path.join(file_path, "component.mak")
+    	update_component_mak(component_mak_file,file_path)
+    	
+    #if result:
+     #   print("Found file paths:")
+      #  for file_path in result:
+       #     print(file_path)
+           
+    #for file_path in result:
+    #	remove_file(file_path)
+"""    
 
