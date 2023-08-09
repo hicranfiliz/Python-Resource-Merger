@@ -33,7 +33,47 @@ def remove_last_n_lines(file_path, n):
 def update_component_mak(component_mak_path, new_svg_file_path):
     with open(component_mak_path, "r") as file:
         lines = file.readlines()
+        
+    in_gameboard_files = False
+    for i in range(len(lines)):
+        line = lines[i].strip()
+        
+        if in_gameboard_files:
+            if line.startswith("$(svg_path)") and line.endswith(".svg"):
+                lines[i] = line + " \\\n"
+                new_line = "    " + new_svg_file_path + "\n"
+                lines.insert(i + 1, new_line)
+                break
+        
+        if line.startswith("GAMEBOARD_XML_FILES :="):
+            in_gameboard_files = True
 
+    with open(component_mak_path, "w") as file:
+        file.writelines(lines)
+"""        
+    in_gameboard_files = False
+    for i in range(len(lines)):
+        line = lines[i]
+        
+        if in_gameboard_files:
+            if line.startswith("$(svg_path)") and line.strip().endswith(".svg"):
+                lines[i] = line.rstrip() + " \\n"
+                new_line = "    " + new_svg_file_path + "\\n"
+                lines.insert(i + 1, new_line)
+                break
+        
+        if line.startswith("GAMEBOARD_XML_FILES :="):
+            in_gameboard_files = True
+
+    with open(component_mak_path, "w") as file:
+        file.writelines(lines)
+"""
+
+# with strip()
+    
+
+"""
+# dosyayı sondan okur.
     for i in range(len(lines) - 1, -1, -1):
         line = lines[i].strip()
         if line.startswith("$(svg_path)") and line.endswith(".svg"):
@@ -45,7 +85,7 @@ def update_component_mak(component_mak_path, new_svg_file_path):
     with open(component_mak_path, "w") as file:
         file.writelines(lines)
 
-
+"""
 def find_added_svg_file(root_folder, svg_file_name):
     added_svg_files = []
     component_mak_folders = []
