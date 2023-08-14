@@ -1,5 +1,6 @@
 import os
 import shutil
+import argparse
 
 
 def find(root_folder, file_names):
@@ -51,21 +52,17 @@ def copy(source_path, target_path):
    except Exception as e:
        print(f"An error occured: {e}")
      
-     
+  
 
-
-if __name__ == "__main__":
+def main():
     root_folder = "/home/hicran/Resource_merger_script/orion_obs"
-    file_names = ["Stajyer_script_3",
-                  "stajyer_script_2.svg",
-                  "stajyer_script_1.svg",
-                  "stajyer_script_2.png",
-                  "stajyer_script_3.png",
-                  "stajyer_script_3.svg",
-                  "StajyerScriptImages.erf"
-                 ]
-                 
-    added_files, component_mak_folders = find(root_folder, file_names)
+    
+    parser = argparse.ArgumentParser(description= "Find and copy specified files.")
+    parser.add_argument("file_names", nargs = "+", help = "File names to search and copy.")
+    
+    args = parser.parse_args()
+    
+    added_files, component_mak_folders = find(root_folder, args.file_names)
     
     print("Files found: \n")
     for file_path in added_files:
@@ -76,7 +73,6 @@ if __name__ == "__main__":
     for component_mak in component_mak_folders:
         print(component_mak)
         
-"""      
-    print("\nFolders found: \n")
-    for folder in all_folders:
-        print(folder)"""
+
+if __name__ == "__main__":
+    main()
