@@ -46,8 +46,7 @@ def find(file_names,erf_file):
             target_folder2 = os.path.join(root_folder, *updated_parts)
             print("Target folder2:", target_folder2)
             
-            update_erf_files(erf_file, target_folder2, os.path.basename(file_path),relative_path_parts)
-
+            
             
             for root, dirs, _ in os.walk(root_folder):
                 target_folder = os.path.join(root, *other_parts)
@@ -55,10 +54,15 @@ def find(file_names,erf_file):
                 if os.path.exists(target_folder):
                     source_file = os.path.basename(file_path) #dosyanin adini al.
                     #copy(file_path, target_folder)
+                  #  update_erf_files(erf_file, target_folder2, os.path.basename(file_path),relative_path_parts)
                     #if source_file.lower().endswith(".png"):
                      #   update_erf_for_png(file_path)
                     #else:
                      #   copy(file_path, target_folder)
+                     
+                     
+            update_erf_files(erf_file, target_folder2, os.path.basename(file_path),relative_path_parts)
+
                     
     else:
         print("File not found.\n")
